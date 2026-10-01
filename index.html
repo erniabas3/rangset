@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modul IPA Interaktif: Rangka, Sendi & Otot (MI Kelas VI)</title>
+    <!-- Menggunakan Tailwind CSS via CDN untuk styling mandiri -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'islamic-green': '#1a5632',
+                        'islamic-light': '#e8f5e9',
+                        'elegant-gold': '#d4af37',
+                        'gold-light': '#fdf6e3',
+                    },
+                    fontFamily: {
+                        'sans': ['Inter', 'ui-sans-serif', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Import font Inter secara eksternal jika ada internet, jika tidak fallback ke sans-serif bawaan browser */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f4f7f6;
+            scroll-behavior: smooth;
+        }
+
+        .card-hover {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Animasi untuk feedback benar/salah */
+        @keyframes pop {
+            0% { transform: scale(0.9); opacity: 0; }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .animate-pop {
+            animation: pop 0.4s ease-out forwards;
+        }
+
+        /* Styling khusus untuk area interaktif drag and drop / slider visual */
+        .interactive-area {
+            background-image: repeating-linear-gradient(45deg, #e8f5e9 25%, transparent 25%, transparent 75%, #e8f5e9 75%, #e8f5e9), repeating-linear-gradient(45deg, #e8f5e9 25%, #ffffff 25%, #ffffff 75%, #e8f5e9 75%, #e8f5e9);
+            background-position: 0 0, 10px 10px;
+            background-size: 20px 20px;
+        }
+
+        /* Sembunyikan elemen secara default */
+        .hidden-section {
+            display: none;
+        }
+
+        /* Tab styling */
+        .tab-btn.active {
+            border-bottom: 4px solid #d4af37;
+            color: #1a5632;
+            font-weight: 700;
+        }
+        
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #e8f5e9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1a5632;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #0d361d;
+        }
+    </style>
+</head>
+<body class="text-gray-800 antialiased selection:bg-elegant-gold selection:text-white">
+
+    <nav class="bg-islamic-green text-white shadow-lg sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center space-x-3">
+                    <!-- Icon sederhana (Buku/Daun) -->
+                    <svg class="h-8 w-8 text-elegant-gold" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                    </svg>
+                    <span class="font-bold text-xl tracking-tight">MPI IPA Kelas VI</span>
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <button onclick="showSection('beranda')" class="hover:bg-green-800 px-3 py-2 rounded-md text-sm font-medium transition">Beranda</button>
+                        <button onclick="showSection('materi')" class="hover:bg-green-800 px-3 py-2 rounded-md text-sm font-medium transition">Materi Belajar</button>
+                        <button onclick="showSection('interaktif')" class="hover:bg-green-800 px-3 py-2 rounded-md text-sm font-medium transition">Simulasi Gerak</button>
+                        <button onclick="showSection('evaluasi')" class="bg-elegant-gold text-islamic-green hover:bg-yellow-500 px-3 py-2 rounded-md text-sm font-bold transition">Kuis Evaluasi</button>
+                    </div>
+                </div>
+                <!-- Mobile menu button -->
+                <div class="md:hidden flex items-center">
+                    <button onclick="toggleMobileMenu()" class="text-white hover:text-elegant-gold focus:outline-none">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <!-- Mobile Menu Panel -->
+        <div id="mobile-menu" class="hidden md:hidden bg-islamic-green border-t border-green-700">
+            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                <button onclick="showSection('beranda'); toggleMobileMenu()" class="block w-full text-left hover:bg-green-800 px-3 py-2 rounded-md text-base font-medium">Beranda</button>
+                <button onclick="showSection('materi'); toggleMobileMenu()" class="block w-full text-left hover:bg-green-800 px-3 py-2 rounded-md text-base font-medium">Materi Belajar</button>
+                <button onclick="showSection('interaktif'); toggleMobileMenu()" class="block w-full text-left hover:bg-green-800 px-3 py-2 rounded-md text-base font-medium">Simulasi Gerak</button>
+                <button onclick="showSection('evaluasi'); toggleMobileMenu()" class="block w-full text-left text-elegant-gold font-bold hover:bg-green-800 px-3 py-2 rounded-md text-base">Kuis Evaluasi</button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 min-h-screen flex flex-col">
+        
+        <!-- SECTION: BERANDA (HOME) -->
+        <section id="sec-beranda" class="flex-grow flex flex-col items-center justify-center text-center space-y-8 animate-pop">
+            <div class="bg-white p-8 rounded-3xl shadow-xl max-w-3xl border-t-8 border-islamic-green">
+                <h1 class="text-4xl md:text-5xl font-extrabold text-islamic-green mb-4">Assalamu'alaikum, Anak Hebat!</h1>
+                <p class="text-lg md:text-xl text-gray-600 mb-6">
+                    Selamat datang di Modul Pembelajaran Interaktif Ilmu Pengetahuan Alam (IPA).
+                    Hari ini kita akan menjelajahi keajaiban ciptaan Allah SWT dalam tubuh kita.
+                </p>
+                <div class="bg-gold-light p-6 rounded-xl border border-elegant-gold mb-8 text-left relative overflow-hidden">
+                    <div class="absolute -right-4 -bottom-4 opacity-10">
+                        <!-- Traktor/Jagung icon silhouette -->
+                        <svg class="w-32 h-32 text-elegant-gold" fill="currentColor" viewBox="0 0 24 24"><path d="M12,2C6.48,2 2,6.48 2,12C2,17.52 6.48,22 12,22C17.52,22 22,17.52 22,12C22,6.48 17.52,2 12,2M11,19.93C7.05,19.43 4,16.05 4,12C4,7.95 7.05,4.57 11,4.07V19.93M13,4.07C16.95,4.57 20,7.95 20,12C20,16.05 16.95,19.43 13,19.93V4.07Z"/></svg>
+                    </div>
+                    <h3 class="font-bold text-islamic-green text-xl mb-2 flex items-center">
+                        <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                        Konteks Gorontalo
+                    </h3>
+                    <p class="text-gray-700 relative z-10">
+                        Coba perhatikan bapak petani di ladang jagung Kabupaten Gorontalo. Saat mereka mencangkul tanah, menanam benih, atau mengangkat karung hasil panen, tubuh mereka bergerak dengan sangat luwes. Tahukah kamu apa yang membuat tangan, kaki, dan punggung kita bisa ditekuk dan bergerak memutar? 
+                        <br><br><strong>Mari kita pelajari rahasia Rangka, Sendi, dan Otot!</strong>
+                    </p>
+                </div>
+                <button onclick="showSection('materi')" class="bg-islamic-green hover:bg-green-700 text-white font-bold py-4 px-8 rounded-full shadow-lg transform transition hover:scale-105 flex items-center justify-center mx-auto text-lg">
+                    Mulai Belajar
+                    <svg class="w-6 h-6 ml-2 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                </button>
+            </div>
+        </section>
+
+        <!-- SECTION: MATERI BELAJAR -->
+        <section id="sec-materi" class="hidden-section flex-grow animate-pop">
+            <div class="bg-white rounded-3xl shadow-lg overflow-hidden">
+                <!-- Tab Headers -->
+                <div class="flex flex-wrap border-b border-gray-200 bg-islamic-light">
+                    <button onclick="switchTab('tab-rangka')" id="btn-tab-rangka" class="tab-btn active flex-1 py-4 px-4 text-center font-semibold text-gray-600 hover:text-islamic-green transition focus:outline-none">1. Rangka (Tulang)</button>
+                    <button onclick="switchTab('tab-sendi')" id="btn-tab-sendi" class="tab-btn flex-1 py-4 px-4 text-center font-semibold text-gray-600 hover:text-islamic-green transition focus:outline-none">2. Macam Sendi</button>
+                    <button onclick="switchTab('tab-otot')" id="btn-tab-otot" class="tab-btn flex-1 py-4 px-4 text-center font-semibold text-gray-600 hover:text-islamic-green transition focus:outline-none">3. Jenis Otot</button>
+                </div>
+
+                <!-- Tab Contents -->
+                <div class="p-6 md:p-10 text-lg">
+                    
+                    <!-- TAB 1: Rangka -->
+                    <div id="tab-rangka" class="tab-content">
+                        <div class="flex flex-col md:flex-row gap-8 items-center">
+                            <div class="flex-1 space-y-4">
+                                <h2 class="text-3xl font-bold text-islamic-green border-b-2 border-elegant-gold inline-block pb-2">Rangka Manusia</h2>
+                                <p>Tubuh kita memiliki kumpulan tulang yang disebut <strong>Rangka</strong>. Rangka adalah alat gerak <strong>pasif</strong>. Artinya, tulang tidak bisa bergerak sendiri jika tidak ditarik oleh otot.</p>
+                                <div class="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                                    <h4 class="font-bold text-blue-800 mb-2">Fungsi Rangka:</h4>
+                                    <ul class="list-disc pl-5 space-y-1 text-gray-700">
+                                        <li>Memberi bentuk tubuh manusia (sehingga kita bisa berdiri tegak).</li>
+                                        <li>Tempat melekatnya otot.</li>
+                                        <li>Melindungi organ dalam yang lunak (seperti otak dilindungi tengkorak, jantung dan paru-paru dilindungi tulang rusuk).</li>
+                                        <li>Tempat pembuatan sel darah (pada sumsum tulang).</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="flex-1 w-full flex justify-center">
+                                <!-- Placeholder untuk gambar rangka menggunakan CSS shapes -->
+                                <div class="relative w-48 h-80 bg-gray-100 rounded-lg border-2 border-gray-300 flex items-center justify-center overflow-hidden shadow-inner">
+                                    <div class="absolute top-4 w-12 h-16 bg-gray-400 rounded-[40%]"></div> <!-- Kepala -->
+                                    <div class="absolute top-22 w-16 h-24 bg-gray-400 rounded-lg"></div> <!-- Badan -->
+                                    <div class="absolute top-22 left-6 w-4 h-32 bg-gray-400 rounded-full origin-top transform rotate-[20deg]"></div> <!-- Lengan Kiri -->
+                                    <div class="absolute top-22 right-6 w-4 h-32 bg-gray-400 rounded-full origin-top transform -rotate-[20deg]"></div> <!-- Lengan Kanan -->
+                                    <div class="absolute bottom-4 left-10 w-5 h-32 bg-gray-400 rounded-full"></div> <!-- Kaki Kiri -->
+                                    <div class="absolute bottom-4 right-10 w-5 h-32 bg-gray-400 rounded-full"></div> <!-- Kaki Kanan -->
+                                    <span class="absolute z-10 bg-white/80 px-2 py-1 text-sm font-bold rounded">Ilustrasi Rangka</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TAB 2: Sendi -->
+                    <div id="tab-sendi" class="tab-content hidden">
+                        <h2 class="text-3xl font-bold text-islamic-green border-b-2 border-elegant-gold inline-block pb-2 mb-6">Macam-Macam Sendi Gerak</h2>
+                        <p class="mb-4">Tulang-tulang di tubuh kita dihubungkan oleh <strong>Sendi</strong>. Sendi gerak (Diartrosis) memungkinkan kita bergerak bebas. Ada 6 macam sendi gerak, mari kita kenali 5 yang paling utama!</p>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            <!-- Card Sendi Engsel -->
+                            <div class="bg-white border border-gray-200 rounded-xl p-5 card-hover shadow-md">
+                                <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mb-4 text-islamic-green font-bold text-xl">1</div>
+                                <h3 class="font-bold text-xl mb-2 text-gray-800">Sendi Engsel</h3>
+                                <p class="text-sm text-gray-600 mb-3">Gerakan <strong>satu arah</strong>, seperti engsel pintu (ditekuk/diluruskan).</p>
+                                <div class="bg-gray-50 p-3 rounded text-sm">
+                                    <strong>Contoh:</strong> Sendi pada <strong>siku</strong> lengan dan <strong>lutut</strong> kaki.
+                                </div>
+                            </div>
+                            <!-- Card Sendi Peluru -->
+                            <div class="bg-white border border-gray-200 rounded-xl p-5 card-hover shadow-md">
+                                <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mb-4 text-islamic-green font-bold text-xl">2</div>
+                                <h3 class="font-bold text-xl mb-2 text-gray-800">Sendi Peluru</h3>
+                                <p class="text-sm text-gray-600 mb-3">Memungkinkan gerakan <strong>ke segala arah</strong> dan memutar bebas.</p>
+                                <div class="bg-gray-50 p-3 rounded text-sm">
+                                    <strong>Contoh:</strong> Antara gelang bahu & tulang lengan atas; tulang paha & panggul.
+                                </div>
+                            </div>
+                            <!-- Card Sendi Putar -->
+                            <div class="bg-white border border-gray-200 rounded-xl p-5 card-hover shadow-md">
+                                <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mb-4 text-islamic-green font-bold text-xl">3</div>
+                                <h3 class="font-bold text-xl mb-2 text-gray-800">Sendi Putar</h3>
+                                <p class="text-sm text-gray-600 mb-3">Tulang yang satu <strong>berputar</strong> mengelilingi tulang lain.</p>
+                                <div class="bg-gray-50 p-3 rounded text-sm">
+                                    <strong>Contoh:</strong> Antara tulang leher pertama dan tulang tengkorak (menengok).
+                                </div>
+                            </div>
+                            <!-- Card Sendi Pelana -->
+                            <div class="bg-white border border-gray-200 rounded-xl p-5 card-hover shadow-md">
+                                <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mb-4 text-islamic-green font-bold text-xl">4</div>
+                                <h3 class="font-bold text-xl mb-2 text-gray-800">Sendi Pelana</h3>
+                                <p class="text-sm text-gray-600 mb-3">Memungkinkan gerakan <strong>dua arah</strong> (depan-belakang, kiri-kanan).</p>
+                                <div class="bg-gray-50 p-3 rounded text-sm">
+                                    <strong>Contoh:</strong> Pangkal ibu jari dengan telapak tangan.
+                                </div>
+                            </div>
+                            <!-- Card Sendi Geser -->
+                            <div class="bg-white border border-gray-200 rounded-xl p-5 card-hover shadow-md">
+                                <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mb-4 text-islamic-green font-bold text-xl">5</div>
+                                <h3 class="font-bold text-xl mb-2 text-gray-800">Sendi Geser</h3>
+                                <p class="text-sm text-gray-600 mb-3">Memungkinkan gerakan <strong>menggeser</strong> pada tulang pipih.</p>
+                                <div class="bg-gray-50 p-3 rounded text-sm">
+                                    <strong>Contoh:</strong> Persendian pada pergelangan tangan dan ruas tulang belakang.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TAB 3: Otot -->
+                    <div id="tab-otot" class="tab-content hidden">
+                        <h2 class="text-3xl font-bold text-islamic-green border-b-2 border-elegant-gold inline-block pb-2 mb-4">Jenis-Jenis Otot</h2>
+                        <p class="mb-6">Otot adalah alat gerak <strong>aktif</strong> yang berkontraksi (memendek) dan relaksasi (memanjang) untuk menggerakkan tulang. Terdapat 3 jenis otot dalam tubuh kita:</p>
+                        
+                        <div class="space-y-6">
+                            <!-- Otot Lurik -->
+                            <div class="flex flex-col md:flex-row bg-white border-l-8 border-red-500 rounded-r-xl shadow-md p-5 items-center gap-6">
+                                <div class="w-24 h-24 bg-red-100 rounded-full flex-shrink-0 flex items-center justify-center">
+                                    <!-- Ikon sederhana Lurik -->
+                                    <div class="w-12 h-12 flex flex-col justify-between">
+                                        <div class="w-full h-2 bg-red-400"></div><div class="w-full h-2 bg-red-800"></div><div class="w-full h-2 bg-red-400"></div><div class="w-full h-2 bg-red-800"></div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <h3 class="text-xl font-bold text-red-600 mb-2">1. Otot Lurik (Otot Rangka)</h3>
+                                    <p class="text-sm text-gray-700"><strong>Bentuk:</strong> Silindris panjang berlurik gelap terang, inti sel banyak di tepi.</p>
+                                    <p class="text-sm text-gray-700"><strong>Sifat Kerja:</strong> <strong>Sadar</strong> (diperintah otak), cepat lelah.</p>
+                                    <p class="text-sm text-gray-700"><strong>Letak:</strong> Menempel pada rangka tubuh (lengan, kaki, dll). <em>Ingat petani mencangkul? Mereka banyak memakai otot lurik!</em></p>
+                                </div>
+                            </div>
+
+                            <!-- Otot Polos -->
+                            <div class="flex flex-col md:flex-row bg-white border-l-8 border-green-500 rounded-r-xl shadow-md p-5 items-center gap-6">
+                                <div class="w-24 h-24 bg-green-100 rounded-full flex-shrink-0 flex items-center justify-center">
+                                    <!-- Ikon sederhana Polos -->
+                                    <div class="w-12 h-4 bg-green-600 rounded-full flex items-center justify-center transform rotate-45">
+                                        <div class="w-2 h-2 bg-white rounded-full"></div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <h3 class="text-xl font-bold text-green-600 mb-2">2. Otot Polos</h3>
+                                    <p class="text-sm text-gray-700"><strong>Bentuk:</strong> Gelendong ujung meruncing, 1 inti sel di tengah.</p>
+                                    <p class="text-sm text-gray-700"><strong>Sifat Kerja:</strong> <strong>Tak Sadar</strong> (otomatis), lambat, tidak cepat lelah.</p>
+                                    <p class="text-sm text-gray-700"><strong>Letak:</strong> Organ dalam seperti usus (pencernaan), pembuluh darah.</p>
+                                </div>
+                            </div>
+
+                            <!-- Otot Jantung -->
+                            <div class="flex flex-col md:flex-row bg-white border-l-8 border-pink-500 rounded-r-xl shadow-md p-5 items-center gap-6">
+                                <div class="w-24 h-24 bg-pink-100 rounded-full flex-shrink-0 flex items-center justify-center">
+                                    <!-- Ikon sederhana Jantung -->
+                                    <svg class="w-12 h-12 text-pink-600" fill="currentColor" viewBox="0 0 24 24"><path d="M12,21.35L10.55,20.03C5.4,15.36 2,12.27 2,8.5C2,5.41 4.42,3 7.5,3C9.24,3 10.91,3.81 12,5.08C13.09,3.81 14.76,3 16.5,3C19.58,3 22,5.41 22,8.5C22,12.27 18.6,15.36 13.45,20.03L12,21.35Z"/></svg>
+                                </div>
+                                <div>
+                                    <h3 class="text-xl font-bold text-pink-600 mb-2">3. Otot Jantung</h3>
+                                    <p class="text-sm text-gray-700"><strong>Bentuk:</strong> Silindris bercabang dan menyatu, inti sel di tengah.</p>
+                                    <p class="text-sm text-gray-700"><strong>Sifat Kerja:</strong> <strong>Tak Sadar</strong>, terus berdetak tanpa lelah.</p>
+                                    <p class="text-sm text-gray-700"><strong>Letak:</strong> HANYA terdapat di dinding <strong>Jantung</strong>.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            
+            <div class="mt-8 text-center">
+                <button onclick="showSection('interaktif')" class="bg-elegant-gold hover:bg-yellow-500 text-islamic-green font-bold py-3 px-8 rounded-full shadow transition inline-flex items-center">
+                    Lanjut ke Simulasi
+                    <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7"/></svg>
+                </button>
+            </div>
+        </section>
+
+        <!-- SECTION: SIMULASI INTERAKTIF -->
+        <section id="sec-interaktif" class="hidden-section flex-grow animate-pop">
+            <div class="bg-white rounded-3xl shadow-lg p-6 md:p-10 border-t-4 border-elegant-gold">
+                <h2 class="text-3xl font-bold text-islamic-green text-center mb-2">Ruang Simulasi Gerak</h2>
+                <p class="text-center text-gray-600 mb-8">Pilih aktivitas petani Gorontalo di bawah ini dan temukan sendi apa yang paling dominan bekerja!</p>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <!-- Aktivitas 1 -->
+                    <div class="border-2 border-gray-200 rounded-xl p-4 text-center cursor-pointer hover:bg-green-50 transition" onclick="simulasikanGerak('mencangkul')">
+                        <div class="w-16 h-16 bg-gray-100 rounded-full mx-auto flex items-center justify-center mb-3">
+                            <span class="text-2xl">💪</span>
+                        </div>
+                        <h3 class="font-bold text-lg">Mengayun Cangkul</h3>
+                        <p class="text-sm text-gray-500">Menekuk dan meluruskan lengan</p>
+                    </div>
+                    <!-- Aktivitas 2 -->
+                    <div class="border-2 border-gray-200 rounded-xl p-4 text-center cursor-pointer hover:bg-green-50 transition" onclick="simulasikanGerak('melempar')">
+                        <div class="w-16 h-16 bg-gray-100 rounded-full mx-auto flex items-center justify-center mb-3">
+                            <span class="text-2xl">🥎</span>
+                        </div>
+                        <h3 class="font-bold text-lg">Melempar Benih Jagung</h3>
+                        <p class="text-sm text-gray-500">Memutar bahu bebas</p>
+                    </div>
+                    <!-- Aktivitas 3 -->
+                    <div class="border-2 border-gray-200 rounded-xl p-4 text-center cursor-pointer hover:bg-green-50 transition" onclick="simulasikanGerak('menengok')">
+                        <div class="w-16 h-16 bg-gray-100 rounded-full mx-auto flex items-center justify-center mb-3">
+                            <span class="text-2xl">👀</span>
+                        </div>
+                        <h3 class="font-bold text-lg">Mengawasi Burung Hama</h3>
+                        <p class="text-sm text-gray-500">Memutar kepala ke kiri & kanan</p>
+                    </div>
+                </div>
+
+                <!-- Area Hasil Simulasi -->
+                <div id="area-simulasi" class="interactive-area rounded-xl p-6 border-2 border-dashed border-green-300 min-h-[250px] flex flex-col items-center justify-center text-center">
+                    <div id="simulasi-default" class="text-gray-500">
+                        <svg class="w-16 h-16 mx-auto mb-3 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"/></svg>
+                        <p class="text-lg font-medium">Klik salah satu kotak aktivitas di atas.</p>
+                    </div>
+                    
+                    <div id="simulasi-hasil" class="hidden w-full max-w-2xl">
+                        <h3 id="sim-judul" class="text-2xl font-bold text-islamic-green mb-2">...</h3>
+                        <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-100 relative">
+                            <!-- Visualisasi Sendi -->
+                            <div id="sim-visual" class="text-5xl mb-4 h-20 flex items-center justify-center">
+                                <!-- Animasi CSS akan disuntik via JS -->
+                            </div>
+                            <div class="inline-block bg-elegant-gold text-islamic-green font-bold px-4 py-1 rounded-full text-sm mb-3" id="sim-jenis">Jenis Sendi</div>
+                            <p id="sim-penjelasan" class="text-gray-700 text-lg leading-relaxed">...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-8 text-center">
+                <button onclick="showSection('evaluasi')" class="bg-islamic-green hover:bg-green-800 text-white font-bold py-3 px-8 rounded-full shadow transition inline-flex items-center">
+                    Uji Pemahamanmu (Kuis)
+                    <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg>
+                </button>
+            </div>
+        </section>
+
+        <!-- SECTION: KUIS EVALUASI -->
+        <section id="sec-evaluasi" class="hidden-section flex-grow animate-pop">
+            <div class="bg-white rounded-3xl shadow-xl overflow-hidden max-w-4xl mx-auto">
+                <div class="bg-islamic-green p-6 text-white text-center">
+                    <h2 class="text-3xl font-bold">Kuis Evaluasi Formatif</h2>
+                    <p class="text-green-100 mt-2">Pilih jawaban yang paling tepat! Nilai akan langsung muncul di akhir.</p>
+                </div>
+                
+                <div class="p-6 md:p-10" id="quiz-container">
+                    <!-- Soal Kuis (Akan dimuat via JS) -->
+                    <div id="quiz-questions"></div>
+
+                    <!-- Navigasi Kuis -->
+                    <div class="flex justify-between mt-8 border-t pt-6">
+                        <button id="btn-prev" onclick="prevQuestion()" class="hidden px-5 py-2 rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-100 font-medium transition">Sebelumnya</button>
+                        <span id="quiz-progress" class="font-bold text-islamic-green flex items-center">Soal 1 dari 5</span>
+                        <button id="btn-next" onclick="nextQuestion()" class="px-5 py-2 rounded-lg bg-islamic-green text-white hover:bg-green-700 font-medium transition">Selanjutnya</button>
+                        <button id="btn-submit" onclick="submitQuiz()" class="hidden px-5 py-2 rounded-lg bg-elegant-gold text-islamic-green hover:bg-yellow-500 font-bold transition">Kumpulkan</button>
+                    </div>
+                </div>
+
+                <!-- Hasil Kuis -->
+                <div id="quiz-result" class="hidden p-6 md:p-10 text-center flex flex-col items-center">
+                    <div class="w-32 h-32 rounded-full border-8 flex items-center justify-center text-4xl font-bold mb-4" id="score-circle">
+                        <span id="final-score">0</span>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-800 mb-2" id="score-message">Luar Biasa!</h3>
+                    <p class="text-gray-600 mb-8" id="score-desc">Kamu telah menyelesaikan modul ini.</p>
+                    
+                    <div class="w-full text-left bg-gray-50 rounded-xl p-5 mb-6 border border-gray-200">
+                        <h4 class="font-bold text-lg mb-4 text-islamic-green border-b pb-2">Pembahasan:</h4>
+                        <div id="pembahasan-container" class="space-y-4 text-sm">
+                            <!-- Pembahasan dimuat via JS -->
+                        </div>
+                    </div>
+
+                    <button onclick="ulangiKuis()" class="px-6 py-2 rounded-full border-2 border-islamic-green text-islamic-green font-bold hover:bg-green-50 transition">Ulangi Kuis</button>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-gray-800 text-white py-6 text-center text-sm mt-auto">
+        <p>&copy; 2026 - Modul Pembelajaran Interaktif MI Kelas VI</p>
+        <p class="text-gray-400 mt-1">Disusun untuk Kanwil Kementerian Agama Prov. Gorontalo</p>
+    </footer>
+
+    <script>
+        // --- NAVIGASI SECTION ---
+        function showSection(sectionId) {
+            // Sembunyikan semua section
+            document.querySelectorAll('section').forEach(sec => {
+                sec.classList.add('hidden-section');
+                sec.classList.remove('animate-pop');
+            });
+            // Tampilkan yang dipilih
+            const target = document.getElementById('sec-' + sectionId);
+            target.classList.remove('hidden-section');
+            // Trigger reflow untuk animasi
+            void target.offsetWidth; 
+            target.classList.add('animate-pop');
+            window.scrollTo(0,0);
+        }
+
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobile-menu');
+            menu.classList.toggle('hidden');
+        }
+
+        // --- TABS MATERI ---
+        function switchTab(tabId) {
+            // Sembunyikan semua konten tab
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.add('hidden'));
+            // Reset gaya tombol tab
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            
+            // Tampilkan konten dan aktifkan tombol
+            document.getElementById(tabId).classList.remove('hidden');
+            document.getElementById('btn-' + tabId).classList.add('active');
+        }
+
+        // --- SIMULASI INTERAKTIF ---
+        function simulasikanGerak(jenis) {
+            const areaDefault = document.getElementById('simulasi-default');
+            const areaHasil = document.getElementById('simulasi-hasil');
+            const judul = document.getElementById('sim-judul');
+            const jenisSendi = document.getElementById('sim-jenis');
+            const penjelasan = document.getElementById('sim-penjelasan');
+            const visual = document.getElementById('sim-visual');
+
+            areaDefault.classList.add('hidden');
+            areaHasil.classList.remove('hidden');
+            areaHasil.classList.remove('animate-pop');
+            void areaHasil.offsetWidth;
+            areaHasil.classList.add('animate-pop');
+
+            if (jenis === 'mencangkul') {
+                judul.innerText = "Mengayun Cangkul (Menekuk Lengan)";
+                jenisSendi.innerText = "Sendi Engsel (pada siku)";
+                penjelasan.innerHTML = "Saat lengan ditekuk dan diluruskan, <strong>Sendi Engsel</strong> pada siku bekerja. Gerakannya hanya <strong>satu arah</strong>, persis seperti engsel pada pintu rumahmu. Selain sendi, <em>otot lurik</em> pada lengan juga berkontraksi kuat agar cangkul bisa terangkat.";
+                // Simple CSS animation fallback
+                visual.innerHTML = `<div style="animation: hingeAnim 1.5s infinite alternate; transform-origin: left bottom; border-bottom: 5px solid #1a5632; border-right: 5px solid #1a5632; width: 60px; height: 60px;"></div>
+                <style>@keyframes hingeAnim { 0% { transform: rotate(0deg); } 100% { transform: rotate(-90deg); } }</style>`;
+            } 
+            else if (jenis === 'melempar') {
+                judul.innerText = "Melempar Benih (Memutar Lengan/Bahu)";
+                jenisSendi.innerText = "Sendi Peluru (pada bahu)";
+                penjelasan.innerHTML = "Saat bapak petani mengayunkan lengan memutar untuk melempar benih, <strong>Sendi Peluru</strong> antara gelang bahu dan tulang lengan atas sedang bekerja. Bentuk bonggol tulang bersarang pada tulang berbentuk mangkuk, memungkinkan gerak <strong>ke segala arah</strong> secara bebas.";
+                visual.innerHTML = `<div style="animation: rollAnim 2s infinite linear; border-radius: 50%; border: 4px dashed #d4af37; width: 60px; height: 60px; display: flex; align-items:center; justify-content:center"><div class="w-8 h-8 bg-islamic-green rounded-full"></div></div>
+                <style>@keyframes rollAnim { 100% { transform: rotate(360deg); } }</style>`;
+            }
+            else if (jenis === 'menengok') {
+                judul.innerText = "Mengawasi Burung (Menengok Kiri-Kanan)";
+                jenisSendi.innerText = "Sendi Putar (pada leher)";
+                penjelasan.innerHTML = "Ketika kepala berbelok ke kiri dan ke kanan, itu karena adanya <strong>Sendi Putar</strong> di antara tulang leher pertama dan tulang tengkorak. Tulang leher berfungsi sebagai poros tempat tulang tengkorak <strong>berputar</strong>.";
+                visual.innerHTML = `<div style="animation: pivotAnim 2s infinite alternate ease-in-out; width: 80px; text-align:center;">👤</div>
+                <style>@keyframes pivotAnim { 0% { transform: rotateY(-60deg); } 100% { transform: rotateY(60deg); } }</style>`;
+            }
+        }
+
+        // --- KUIS LOGIC ---
+        const bankSoal = [
+            {
+                pertanyaan: "Para petani di Kabupaten Gorontalo sering menunduk lalu kembali berdiri tegak saat memanen jagung. Tulang yang melindungi sumsum tulang belakang dan menopang tubuh agar bisa tegak adalah bagian dari...",
+                opsi: ["A. Tulang Tengkorak", "B. Tulang Anggota Gerak", "C. Tulang Badan (Tulang Belakang)", "D. Tulang Rusuk"],
+                jawabanBenar: 2, // Index C
+                pembahasan: "Tulang belakang (bagian dari tulang badan) berfungsi menopang berat tubuh agar bisa berdiri tegak dan melindungi sumsum tulang belakang yang merupakan sistem saraf pusat."
+            },
+            {
+                pertanyaan: "Saat menanam benih padi di sawah, pergelangan tangan petani bergerak luwes. Sendi yang memungkinkan pergerakan menggeser antar tulang pada pergelangan tangan disebut...",
+                opsi: ["A. Sendi Putar", "B. Sendi Geser", "C. Sendi Peluru", "D. Sendi Engsel"],
+                jawabanBenar: 1, // Index B
+                pembahasan: "Sendi geser terdapat pada pergelangan tangan dan ruas tulang belakang, memungkinkan tulang bergeser di atas tulang lainnya."
+            },
+            {
+                pertanyaan: "Rahman sedang makan binthe biluhuta (sup jagung khas Gorontalo). Ia membuka dan menutup mulutnya untuk mengunyah. Gerakan pada rahang Rahman dibantu oleh sendi...",
+                opsi: ["A. Sendi Pelana", "B. Sendi Gulung", "C. Sendi Engsel", "D. Sendi Putar"],
+                jawabanBenar: 1, // Index B (Berdasarkan sumber materi, rahang sering dikategorikan sendi gulung/condyloid)
+                pembahasan: "Berdasarkan materi, sendi pada tulang rahang termasuk sendi gulung (memungkinkan gerakan dua arah: depan-belakang, kanan-kiri untuk mengunyah)."
+            },
+            {
+                pertanyaan: "Otot manusia dibagi menjadi tiga. Otot yang letaknya menempel pada tulang lengan dan kaki, bentuknya silindris panjang berlurik, dan bekerja atas perintah kesadaran otak (volunter) adalah...",
+                opsi: ["A. Otot Polos", "B. Otot Jantung", "C. Otot Lurik (Rangka)", "D. Otot Kawat"],
+                jawabanBenar: 2, // Index C
+                pembahasan: "Otot lurik (otot rangka) bekerja secara sadar (menurut kemauan kita), bentuknya berlurik-lurik, dan menempel pada rangka untuk menggerakkan tulang."
+            },
+            {
+                pertanyaan: "Perhatikan ciri-ciri otot berikut:\n1) Bentuk gelendong ujung meruncing\n2) Bekerja secara tidak sadar (involunter)\n3) Terletak pada organ dalam seperti lambung dan usus.\nOtot apakah yang memiliki ciri-ciri tersebut?",
+                opsi: ["A. Otot Polos", "B. Otot Lurik", "C. Otot Jantung", "D. Otot Bisep"],
+                jawabanBenar: 0, // Index A
+                pembahasan: "Otot polos bekerja tanpa perintah kesadaran kita (otonom), berbentuk gelendong, dan menyusun organ dalam seperti lambung, usus, dan pembuluh darah agar pencernaan terus berjalan meski kita tidur."
+            }
+        ];
+
+        let currentQuestion = 0;
+        let userAnswers = new Array(bankSoal.length).fill(null);
+
+        function initQuiz() {
+            const container = document.getElementById('quiz-questions');
+            container.innerHTML = '';
+            
+            bankSoal.forEach((soal, qIndex) => {
+                const questionDiv = document.createElement('div');
+                questionDiv.id = `q-container-${qIndex}`;
+                questionDiv.className = qIndex === 0 ? 'block' : 'hidden'; // Hanya tampilkan soal pertama
+                
+                let opsiHtml = '';
+                soal.opsi.forEach((opt, oIndex) => {
+                    opsiHtml += `
+                        <label class="flex items-start p-4 border border-gray-200 rounded-lg mb-3 cursor-pointer hover:bg-green-50 transition w-full"
+                               onclick="selectOption(${qIndex}, ${oIndex})">
+                            <input type="radio" name="q${qIndex}" value="${oIndex}" class="mt-1 h-4 w-4 text-islamic-green focus:ring-islamic-green cursor-pointer">
+                            <span class="ml-3 text-gray-700">${opt}</span>
+                        </label>
+                    `;
+                });
+
+                questionDiv.innerHTML = `
+                    <div class="mb-6">
+                        <h3 class="text-xl font-bold text-gray-800 leading-relaxed whitespace-pre-line">${qIndex + 1}. ${soal.pertanyaan}</h3>
+                    </div>
+                    <div class="space-y-2">
+                        ${opsiHtml}
+                    </div>
+                `;
+                container.appendChild(questionDiv);
+            });
+            updateNavButtons();
+        }
+
+        function selectOption(qIndex, oIndex) {
+            userAnswers[qIndex] = oIndex;
+            // Visual feedback pada radio button otomatis dari browser,
+            // Namun kita bisa menambahkan styling extra jika mau.
+        }
+
+        function updateNavButtons() {
+            document.getElementById('btn-prev').classList.toggle('hidden', currentQuestion === 0);
+            
+            if (currentQuestion === bankSoal.length - 1) {
+                document.getElementById('btn-next').classList.add('hidden');
+                document.getElementById('btn-submit').classList.remove('hidden');
+            } else {
+                document.getElementById('btn-next').classList.remove('hidden');
+                document.getElementById('btn-submit').classList.add('hidden');
+            }
+            
+            document.getElementById('quiz-progress').innerText = `Soal ${currentQuestion + 1} dari ${bankSoal.length}`;
+        }
+
+        function nextQuestion() {
+            // Validasi apakah sudah diisi (opsional, jika ingin wajib diisi)
+            if (currentQuestion < bankSoal.length - 1) {
+                document.getElementById(`q-container-${currentQuestion}`).classList.add('hidden');
+                currentQuestion++;
+                document.getElementById(`q-container-${currentQuestion}`).classList.remove('hidden');
+                document.getElementById(`q-container-${currentQuestion}`).classList.add('animate-pop');
+                updateNavButtons();
+            }
+        }
+
+        function prevQuestion() {
+            if (currentQuestion > 0) {
+                document.getElementById(`q-container-${currentQuestion}`).classList.add('hidden');
+                currentQuestion--;
+                document.getElementById(`q-container-${currentQuestion}`).classList.remove('hidden');
+                document.getElementById(`q-container-${currentQuestion}`).classList.add('animate-pop');
+                updateNavButtons();
+            }
+        }
+
+        function submitQuiz() {
+            // Cek apakah ada yang kosong
+            if (userAnswers.includes(null)) {
+                alert('Tolong jawab semua soal terlebih dahulu ya!');
+                return;
+            }
+
+            let score = 0;
+            let pembahasanHtml = '';
+
+            userAnswers.forEach((ans, index) => {
+                const benar = ans === bankSoal[index].jawabanBenar;
+                if (benar) score += 20; // 5 soal x 20 = 100
+
+                const statusColor = benar ? 'text-green-600' : 'text-red-600';
+                const statusIcon = benar ? '✅' : '❌';
+                
+                pembahasanHtml += `
+                    <div class="mb-4 pb-4 border-b border-gray-200 last:border-0">
+                        <p class="font-bold mb-1">Soal ${index + 1} ${statusIcon}</p>
+                        <p class="${statusColor} font-medium mb-1">Jawabanmu: ${bankSoal[index].opsi[ans]}</p>
+                        ${!benar ? `<p class="text-green-700 font-medium mb-1">Kunci: ${bankSoal[index].opsi[bankSoal[index].jawabanBenar]}</p>` : ''}
+                        <p class="text-gray-600 text-xs sm:text-sm mt-2 italic bg-gray-100 p-2 rounded border-l-4 ${benar ? 'border-green-500' : 'border-red-500'}">${bankSoal[index].pembahasan}</p>
+                    </div>
+                `;
+            });
+
+            // Tampilkan hasil
+            document.getElementById('quiz-container').classList.add('hidden');
+            const resultDiv = document.getElementById('quiz-result');
+            resultDiv.classList.remove('hidden');
+            resultDiv.classList.add('animate-pop');
+
+            // Set Nilai
+            const scoreCircle = document.getElementById('score-circle');
+            document.getElementById('final-score').innerText = score;
+            
+            let message = '';
+            let desc = '';
+            if(score === 100) {
+                scoreCircle.className = "w-32 h-32 rounded-full border-8 border-green-500 text-green-600 flex items-center justify-center text-5xl font-bold mb-4 bg-green-50";
+                message = "Mumtaz! Luar Biasa!";
+                desc = "Pemahamanmu tentang Rangka, Sendi dan Otot sangat sempurna.";
+            } else if (score >= 60) {
+                scoreCircle.className = "w-32 h-32 rounded-full border-8 border-yellow-400 text-yellow-600 flex items-center justify-center text-5xl font-bold mb-4 bg-yellow-50";
+                message = "Bagus Sekali!";
+                desc = "Kamu sudah memahami sebagian besar materi, pelajari lagi bagian yang salah ya.";
+            } else {
+                scoreCircle.className = "w-32 h-32 rounded-full border-8 border-red-500 text-red-600 flex items-center justify-center text-5xl font-bold mb-4 bg-red-50";
+                message = "Tetap Semangat!";
+                desc = "Jangan menyerah, ayo baca kembali materi di tab 'Materi Belajar'.";
+            }
+            
+            document.getElementById('score-message').innerText = message;
+            document.getElementById('score-desc').innerText = desc;
+            document.getElementById('pembahasan-container').innerHTML = pembahasanHtml;
+            window.scrollTo(0,0);
+        }
+
+        function ulangiKuis() {
+            currentQuestion = 0;
+            userAnswers = new Array(bankSoal.length).fill(null);
+            
+            document.getElementById('quiz-result').classList.add('hidden');
+            document.getElementById('quiz-container').classList.remove('hidden');
+            
+            initQuiz();
+            window.scrollTo(0,0);
+        }
+
+        // Initialize quiz on load
+        window.onload = function() {
+            initQuiz();
+        };
+
+    </script>
+</body>
+</html>
